@@ -1,0 +1,49 @@
+#! /bin/bash
+
+LOGFILE=/var/log/factorioctl.log
+
+function log(){
+  echo "$1" | tee -a "$LOGFILE"
+}
+
+function uninstall(){
+  log "Removing systemd service"
+  systemctl disable --now factorio
+  rm /etc/systemd/system/factorio.service
+  log "Removing factorio server"
+  rm -rf /srv/factorio
+  log "Removing user and group"
+  deluser factorio
+  log "Removing factorioctl"
+  rm /sbin/factorioctl
+}
+
+function upgrade(){
+  log "Stopping server"
+  systemctl stop factorio
+  log "Downloading version $1"
+  URL="https://factorio.com/get-download/$1/headless/linux64"
+  wget $URL -O factorio.tar.gz
+  log "Extracting to /srv/factorio"
+  tar -xf factorio.tar.gz -C /srv
+  sudo chown -R factorio:factorio /srv/factorio
+  log "Starting server"
+  systemctl start factorio
+  rm factorio.tar.gz
+  log "Done"
+}
+
+if [ "$USER" != "root" ]; then
+  log "Must run as root"
+  exit 1
+fi
+
+echo "Logs will go to $LOGFILE"
+
+log "Factorioctl $(date)"
+
+if [ "$1" == "uninstall" ]; then
+  uninstall
+elif [ "$1" == "upgrade" ]; then
+  upgrade "$2"
+fi

@@ -6,6 +6,12 @@ function log(){
   echo "$1" | tee -a "$LOGFILE"
 }
 
+function backup() {
+  log "Backing up save files"
+  mkdir /srv/factorio/saves.bak
+  cp /srv/factorio/saves/* /srv/factorio/saves.bak
+}
+
 function uninstall(){
   log "Removing systemd service"
   systemctl disable --now factorio
@@ -21,6 +27,7 @@ function uninstall(){
 function upgrade(){
   log "Stopping server"
   systemctl stop factorio
+  backup
   log "Downloading version $1"
   URL="https://factorio.com/get-download/$1/headless/linux64"
   wget $URL -O factorio.tar.gz
@@ -31,6 +38,39 @@ function upgrade(){
   systemctl start factorio
   rm factorio.tar.gz
   log "Done"
+}
+
+function stop() {
+  log "Stopping server"
+  systemctl stop factorio
+}
+
+function start() {
+  log "Starting server"
+  systemctl start factorio
+}
+
+function reinstall() {
+  log "Stopping server"
+  systemctl stop factorio
+  log "Removing server data"
+  rm -rf /srv/factorio
+  log "Downloading version $1"
+  URL="https://factorio.com/get-download/$1/headless/linux64"
+  wget $URL -O factorio.tar.gz
+  log "Extracting to /srv/factorio"
+  tar -xf factorio.tar.gz -C /srv
+  ln -s /srv/factorio/bin/x64/factorio /srv/factorio/factorio
+  log "Copying settings"
+  cp /srv/factorio/data/server-settings.example.json /srv/factorio/data/server-settings.json
+  cp /srv/factorio/data/map-gen-settings.example.json /srv/factorio/data/map-gen-settings.json
+  log "Generating map"
+  /srv/factorio/factorio --create /srv/factorio/saves/map.zip --map-gen-settings /srv/factorio/data/map-gen-settings.json
+  sudo chown -R factorio:factorio /srv/factorio
+  log "Starting server"
+  systemctl start factorio
+  rm factorio.tar.gz
+  log "Server reinstalled"
 }
 
 if [ "$USER" != "root" ]; then
@@ -46,4 +86,13 @@ if [ "$1" == "uninstall" ]; then
   uninstall
 elif [ "$1" == "upgrade" ]; then
   upgrade "$2"
+elif [ "$1" == "stop" ]; then
+  stop
+elif [ "$1" == "start" ]; then
+  start
+elif [ "$1" == "restart" ]; then
+  stop
+  start
+elif [ "$1" == "reinstall" ]; then
+  reinstall "$2"
 fi

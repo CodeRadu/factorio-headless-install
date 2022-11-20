@@ -58,7 +58,7 @@ EOF
 
 systemctl enable --now factorio.service
 
-log "Creating ctl tool"
+log "Creating factorioctl tool"
 
 cp factorioctl /sbin/factorioctl
 chmod +x /sbin/factorioctl

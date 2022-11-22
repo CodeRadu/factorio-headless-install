@@ -6,6 +6,21 @@ function log(){
   echo "$1" | tee -a "$LOGFILE"
 }
 
+function create_service() {
+  cat > /etc/systemd/system/factorio.service <<- EOF
+[Unit]
+Description=Factorio Headless Server
+
+[Service]
+Type=simple
+User=factorio
+ExecStart=/srv/factorio/factorio --start-server-load-latest /srv/factorio/saves/map.zip --server-settings /srv/factorio/data/server-settings.json
+
+[Install]
+WantedBy=multi-user.target
+EOF
+}
+
 function backup() {
   log "Backing up save files"
   mkdir /srv/factorio/saves.bak
@@ -20,8 +35,6 @@ function uninstall(){
   rm -rf /srv/factorio
   log "Removing user and group"
   deluser factorio
-  log "Removing factorioctl"
-  rm /sbin/factorioctl
 }
 
 function upgrade(){
@@ -51,10 +64,7 @@ function start() {
 }
 
 function reinstall() {
-  log "Stopping server"
-  systemctl stop factorio
-  log "Removing server data"
-  rm -rf /srv/factorio
+  uninstall
   log "Downloading version $1"
   URL="https://factorio.com/get-download/$1/headless/linux64"
   wget $URL -O factorio.tar.gz
@@ -66,9 +76,12 @@ function reinstall() {
   cp /srv/factorio/data/map-gen-settings.example.json /srv/factorio/data/map-gen-settings.json
   log "Generating map"
   /srv/factorio/factorio --create /srv/factorio/saves/map.zip --map-gen-settings /srv/factorio/data/map-gen-settings.json
+  log "Adding user"
+  adduser --disabled-login --no-create-home --gecos factorio factorio
   sudo chown -R factorio:factorio /srv/factorio
   log "Starting server"
-  systemctl start factorio
+  create_service
+  systemctl enable --now factorio
   rm factorio.tar.gz
   log "Server reinstalled"
 }
@@ -84,6 +97,11 @@ log "Factorioctl $(date)"
 
 if [ "$1" == "uninstall" ]; then
   uninstall
+  log "To remove factorioctl run factorioctl remove"
+  log "To reinstall the server run factorioctl reinstall <verion>"
+elif [ "$1" == "remove" ]; then
+  rm /sbin/factorioctl
+  rm /var/log/factorioctl.log
 elif [ "$1" == "upgrade" ]; then
   upgrade "$2"
 elif [ "$1" == "stop" ]; then

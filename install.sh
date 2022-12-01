@@ -1,6 +1,6 @@
 #! /bin/bash
 
-VERSION="1.1.70"
+VERSION="1.1.72"
 URL="https://factorio.com/get-download/$VERSION/headless/linux64"
 
 LOGFILE=/var/log/factorioctl.log

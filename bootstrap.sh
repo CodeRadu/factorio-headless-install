@@ -36,7 +36,7 @@ log() {
 }
 
 REPO="https://github.com/coderadu/factorio-headless-install.git"
-CLONE_PATH="$HOME/factorio-headless-install/factorio"
+CLONE_PATH="$HOME/factorio-headless-install"
 
 # Install git
 log "Installing git"

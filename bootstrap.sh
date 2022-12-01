@@ -48,6 +48,7 @@ git clone "$REPO" "$CLONE_PATH" &> /dev/null
 
 # Run installation script
 log "Installing factorio headless"
+cd $CLONE_PATH
 sudo $CLONE_PATH/install.sh &> /dev/null
 
 # Cleanup

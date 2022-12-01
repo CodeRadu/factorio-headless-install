@@ -50,6 +50,7 @@ git clone "$REPO" "$CLONE_PATH" &> /dev/null
 log "Installing factorio headless"
 cd $CLONE_PATH
 sudo $CLONE_PATH/install.sh &> /dev/null
+sudo cp "$CLONE_PATH/factorioctl" "/sbin/factorioctl"
 
 # Cleanup
 log "Cleaning up"

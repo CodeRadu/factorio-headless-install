@@ -14,7 +14,7 @@ Description=Factorio Headless Server
 [Service]
 Type=simple
 User=factorio
-ExecStart=/srv/factorio/factorio --start-server-load-latest /srv/factorio/saves/map.zip --server-settings /srv/factorio/data/server-settings.json
+ExecStart=/srv/factorio/factorio --start-server /srv/factorio/saves/map.zip --server-settings /srv/factorio/data/server-settings.json
 
 [Install]
 WantedBy=multi-user.target

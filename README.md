@@ -1,7 +1,9 @@
 # Factorio Headless install script
 
 ## Installing
-`curl -fsSL https://raw.githubusercontent.com/CodeRadu/factorio-headless-install/master/bootstrap.sh | bash`
+```sh
+curl -fsSL https://raw.githubusercontent.com/CodeRadu/factorio-headless-install/master/bootstrap.sh | bash
+```
 ## The factorioctl command
 It can:
 1. Remove factorio headless `factorioctl uninstall`
